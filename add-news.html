@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Haber Ekle - Instagram Haber Sistemi</title>
+    <link rel="stylesheet" href="add-news.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Haber Ekle</h1>
+            <p>Yeni haber ekleyin ve Instagram'da paylaşın</p>
+            <a href="index.html" class="view-link">Haberleri Görüntüle</a>
+        </header>
+        
+        <div class="content">
+            <div class="form-section">
+                <h2>Yeni Haber Ekle</h2>
+                <form id="news-form">
+                    <div class="form-group">
+                        <label for="news-image">Haber Resmi</label>
+                        <input type="file" id="news-image" accept="image/*" required>
+                        <small class="help-text">Instagram'da görünecek resmi seçin</small>
+                        <div id="image-preview" class="image-preview"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="news-text">Haber Metni</label>
+                        <textarea id="news-text" placeholder="Haber metnini girin" required maxlength="500"></textarea>
+                        <div class="char-count"><span id="char-counter">0</span>/500 karakter</div>
+                        <small class="help-text">Instagram gönderinizde görünecek metin</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="news-link">Haber Linki</label>
+                        <input type="url" id="news-link" placeholder="GitHub Pages veya diğer link" required>
+                        <small class="help-text">Detaylar için GitHub Pages veya diğer link</small>
+                    </div>
+                    
+                    <button type="submit" class="btn">Haberi Ekle</button>
+                </form>
+            </div>
+            
+            <div class="recent-news">
+                <h2>Son Eklenen Haberler</h2>
+                <div id="added-news">
+                    <!-- Eklenen haberler burada gösterilecek -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Haberleri localStorage'dan al veya boş bir dizi oluştur
+        let news = JSON.parse(localStorage.getItem('news')) || [];
+        
+        // Karakter sayacı
+        document.getElementById('news-text').addEventListener('input', function() {
+            document.getElementById('char-counter').textContent = this.value.length;
+        });
+        
+        // Resim önizleme
+        document.getElementById('news-image').addEventListener('change', function(e) {
+            const preview = document.getElementById('image-preview');
+            preview.innerHTML = '';
+            
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    preview.appendChild(img);
+                }
+                
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+        
+        // Haber ekleme formunu işle
+        document.getElementById('news-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const imageFile = document.getElementById('news-image').files[0];
+            const text = document.getElementById('news-text').value;
+            const link = document.getElementById('news-link').value;
+            
+            if (!imageFile) {
+                alert('Lütfen bir resim seçin!');
+                return;
+            }
+            
+            // Resmi base64'e çevir
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const newNews = {
+                    id: Date.now(),
+                    image: e.target.result, // base64 resim verisi
+                    text: text,
+                    link: link,
+                    date: new Date().toLocaleDateString('tr-TR')
+                };
+                
+                // Haberi dizimize ekle
+                news.push(newNews);
+                
+                // localStorage'a kaydet
+                localStorage.setItem('news', JSON.stringify(news));
+                
+                // Formu temizle
+                document.getElementById('news-form').reset();
+                document.getElementById('image-preview').innerHTML = '';
+                document.getElementById('char-counter').textContent = '0';
+                
+                // Eklenen haberleri güncelle
+                updateAddedNews();
+                
+                alert('Haber başarıyla eklendi!');
+            };
+            
+            reader.readAsDataURL(imageFile);
+        });
+        
+        // Eklenen haberleri güncelle
+        function updateAddedNews() {
+            const addedNewsContainer = document.getElementById('added-news');
+            
+            if (news.length === 0) {
+                addedNewsContainer.innerHTML = '<div class="empty-message">Henüz haber eklenmemiş</div>';
+                return;
+            }
+            
+            addedNewsContainer.innerHTML = '';
+            
+            // Son 5 haberi göster (ters sırada)
+            const recentNews = [...news].reverse().slice(0, 5);
+            
+            recentNews.forEach(item => {
+                const newsItem = document.createElement('div');
+                newsItem.className = 'news-item';
+                newsItem.innerHTML = `
+                    <div class="news-item-preview">
+                        <img src="${item.image}" alt="Haber Resmi">
+                        <div class="news-item-info">
+                            <h3>${item.text.substring(0, 50)}${item.text.length > 50 ? '...' : ''}</h3>
+                            <span class="news-date">${item.date}</span>
+                        </div>
+                    </div>
+                    <div class="news-item-actions">
+                        <a href="${item.link}" target="_blank" class="news-link">Git</a>
+                        <button class="delete-btn" onclick="deleteNews(${item.id})">Sil</button>
+                    </div>
+                `;
+                addedNewsContainer.appendChild(newsItem);
+            });
+        }
+        
+        // Haber silme fonksiyonu
+        function deleteNews(id) {
+            if (confirm('Bu haberi silmek istediğinizden emin misiniz?')) {
+                news = news.filter(item => item.id !== id);
+                localStorage.setItem('news', JSON.stringify(news));
+                updateAddedNews();
+                alert('Haber başarıyla silindi!');
+            }
+        }
+        
+        // Sayfa yüklendiğinde verileri göster
+        document.addEventListener('DOMContentLoaded', function() {
+            updateAddedNews();
+        });
+    </script>
+</body>
+</html>

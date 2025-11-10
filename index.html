@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram Haberleri</title>
+    <link rel="stylesheet" href="view-news.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Instagram Haberleri</h1>
+            <p>Eklenen tüm haberler burada görüntülenir</p>
+            <a href="add-news.html" class="add-link">Yeni Haber Ekle</a>
+        </header>
+        
+        <div class="controls">
+            <div class="search-box">
+                <input type="text" id="search-news" placeholder="Haberlerde ara...">
+                <button id="clear-search" class="btn-secondary">Temizle</button>
+            </div>
+            <div class="sort-controls">
+                <label for="sort-news">Sırala:</label>
+                <select id="sort-news">
+                    <option value="newest">En Yeni</option>
+                    <option value="oldest">En Eski</option>
+                </select>
+            </div>
+        </div>
+        
+        <div id="news-container" class="news-grid">
+            <!-- Haberler burada gösterilecek -->
+        </div>
+    </div>
+
+    <script>
+        // Haberleri localStorage'dan al
+        let news = JSON.parse(localStorage.getItem('news')) || [];
+        
+        // Haber görüntüleme sayfasını güncelle
+        function updateNewsView() {
+            const newsContainer = document.getElementById('news-container');
+            const searchTerm = document.getElementById('search-news').value.toLowerCase();
+            const sortBy = document.getElementById('sort-news').value;
+            
+            // Arama terimine göre haberleri filtrele
+            let filteredNews = news.filter(item => 
+                item.text.toLowerCase().includes(searchTerm)
+            );
+            
+            // Sıralama
+            if (sortBy === 'newest') {
+                filteredNews = [...filteredNews].reverse();
+            }
+            
+            if (filteredNews.length === 0) {
+                newsContainer.innerHTML = `
+                    <div class="empty-message">
+                        <h3>Henüz haber eklenmemiş</h3>
+                        <p>İlk haberi eklemek için <a href="add-news.html">buraya tıklayın</a></p>
+                    </div>
+                `;
+                return;
+            }
+            
+            newsContainer.innerHTML = '';
+            
+            filteredNews.forEach(item => {
+                const newsCard = document.createElement('div');
+                newsCard.className = 'news-card';
+                newsCard.innerHTML = `
+                    <div class="news-image">
+                        <img src="${item.image}" alt="Haber Resmi">
+                    </div>
+                    <div class="news-content">
+                        <h3>${item.text}</h3>
+                        <div class="news-footer">
+                            <span class="news-date">${item.date}</span>
+                            <a href="${item.link}" target="_blank" class="news-link">Detayları Gör →</a>
+                        </div>
+                    </div>
+                `;
+                newsContainer.appendChild(newsCard);
+            });
+        }
+        
+        // Arama kutusu işlevselliği
+        document.getElementById('search-news').addEventListener('input', updateNewsView);
+        document.getElementById('clear-search').addEventListener('click', function() {
+            document.getElementById('search-news').value = '';
+            updateNewsView();
+        });
+        
+        // Sıralama işlevselliği
+        document.getElementById('sort-news').addEventListener('change', updateNewsView);
+        
+        // Sayfa yüklendiğinde verileri göster
+        document.addEventListener('DOMContentLoaded', function() {
+            updateNewsView();
+        });
+    </script>
+</body>
+</html>
