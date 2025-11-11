@@ -3,27 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Instagram Haberleri</title>
+    <title>Welcome to CFN!</title>
     <link rel="stylesheet" href="view-news.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>Instagram Haberleri</h1>
-            <p>Eklenen tüm haberler burada görüntülenir</p>
-            <a href="add-news.html" class="add-link">Yeni Haber Ekle</a>
+            <h1>Welcome to CFN!</h1>
+    <!--   <p>Eklenen tüm haberler burada görüntülenir</p> -->  
+     <!--          <a href="add-news.html" class="add-link">Yeni Haber Ekle</a>  -->  
         </header>
         
         <div class="controls">
             <div class="search-box">
-                <input type="text" id="search-news" placeholder="Haberlerde ara...">
-                <button id="clear-search" class="btn-secondary">Temizle</button>
+                <input type="text" id="search-news" placeholder="Fast search...">
+                <button id="clear-search" class="btn-secondary">Clear</button>
             </div>
             <div class="sort-controls">
-                <label for="sort-news">Sırala:</label>
+                <label for="sort-news">Sort by:</label>
                 <select id="sort-news">
-                    <option value="newest">En Yeni</option>
-                    <option value="oldest">En Eski</option>
+                    <option value="newest">Newest</option>
+                    <option value="oldest">Oldest</option>
                 </select>
             </div>
         </div>
@@ -53,15 +53,15 @@
                 filteredNews = [...filteredNews].reverse();
             }
             
-            if (filteredNews.length === 0) {
+             if (filteredNews.length === 0) {
                 newsContainer.innerHTML = `
                     <div class="empty-message">
-                        <h3>Henüz haber eklenmemiş</h3>
+                        <h3>Not yet!</h3>
                         <p>İlk haberi eklemek için <a href="add-news.html">buraya tıklayın</a></p>
                     </div>
                 `;
                 return;
-            }
+            } 
             
             newsContainer.innerHTML = '';
             
